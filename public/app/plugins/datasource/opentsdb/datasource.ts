@@ -363,9 +363,15 @@ export default class OpenTsDatasource {
     const metricLabel = this.createMetricLabel(md, target, groupByTags, options);
     const dps = [];
 
+    // TSDB doesn't support scaling, so allow it client side
+    const scale = parseFloat(target.scaleby);
+
     // TSDB returns datapoints has a hash of ts => value.
     // Can't use _.pairs(invert()) because it stringifies keys/values
     _.each(md.dps, function(v, k) {
+      if (!isNaN(scale) && scale !== 1){
+        v = v * scale;
+      }
       if (tsdbResolution === 2) {
         dps.push([v, k * 1]);
       } else {
